@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ฟอร์มจองรถ (พนักงาน)</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Kanit', sans-serif;
+      background: linear-gradient(135deg, #eef2ff, #f8fafc);
+    }
+
+    .card {
+      border-radius: 20px;
+      border: none;
+    }
+
+    .card-header {
+      border-radius: 20px 20px 0 0 !important;
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      padding: 20px;
+    }
+
+    .card-header h4 {
+      margin: 0;
+      font-weight: 500;
+    }
+
+    label {
+      font-weight: 500;
+      margin-bottom: 5px;
+    }
+
+    .form-control, .form-select {
+      border-radius: 12px;
+      padding: 10px;
+      border: 1px solid #e5e7eb;
+      transition: 0.2s;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 2px rgba(99,102,241,0.2);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      border: none;
+      border-radius: 12px;
+      padding: 12px;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+
+    .btn-success:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    .link-admin {
+      font-size: 14px;
+      text-decoration: none;
+      transition: 0.2s;
+    }
+
+    .link-admin:hover {
+      color: #4f46e5;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container mt-5 mb-5">
+  <div class="card shadow-lg">
+    
+    <!-- Header -->
+    <div class="card-header text-white text-center">
+      <h4>🚗 ระบบจองรถโรงพยาบาล</h4>
+      <small>Vehicle Booking System</small>
+    </div>
+
+    <!-- Body -->
+    <div class="card-body p-4">
+
+      <form id="bookingForm" onsubmit="submitForm(event)">
+        
+        <!-- ข้อมูลผู้จอง -->
+        <div class="mb-3">
+          <h6 class="text-muted mb-3">ข้อมูลผู้จอง</h6>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label>ชื่อ-สกุล</label>
+              <input type="text" class="form-control" name="name" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label>แผนก</label>
+              <input type="text" class="form-control" name="department" required>
+            </div>
+          </div>
+        </div>
+
+        <!-- เวลา -->
+        <div class="mb-3">
+          <h6 class="text-muted mb-3">วันและเวลา</h6>
+          <div class="row">
+            <div class="col-md-3 mb-3">
+              <label>วันที่เดินทาง</label>
+              <input type="date" class="form-control" name="dateOut" required>
+            </div>
+            <div class="col-md-3 mb-3">
+              <label>เวลาออก</label>
+              <input type="time" class="form-control" name="timeOut" required>
+            </div>
+            <div class="col-md-3 mb-3">
+              <label>วันที่กลับ</label>
+              <input type="date" class="form-control" name="dateIn" required>
+            </div>
+            <div class="col-md-3 mb-3">
+              <label>เวลากลับ</label>
+              <input type="time" class="form-control" name="timeIn" required>
+            </div>
+          </div>
+        </div>
+
+        <!-- รายละเอียด -->
+        <div class="mb-3">
+          <h6 class="text-muted mb-3">รายละเอียดการใช้งาน</h6>
+          <div class="row">
+            <div class="col-md-8 mb-3">
+              <label>จุดหมาย / วัตถุประสงค์</label>
+              <input type="text" class="form-control" name="destination" required>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label>เบอร์ติดต่อ</label>
+              <input type="tel" class="form-control" name="phone" required>
+            </div>
+          </div>
+        </div>
+
+        <!-- รถ -->
+        <div class="mb-4">
+          <h6 class="text-muted mb-3">เลือกทรัพยากร</h6>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label>เลือกรถ</label>
+              <select class="form-select" name="vehicle" id="vehicleSelect">
+                <option value="">กำลังโหลด...</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label>เลือกคนขับ</label>
+              <select class="form-select" name="driver" id="driverSelect">
+                <option value="">ไม่ระบุ / ให้แอดมินจัดหา</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- ปุ่ม -->
+        <button type="submit" class="btn btn-success w-100" id="btnSubmit">
+          ✅ ยืนยันคำขอจองรถ
+        </button>
+
+      </form>
+
+    </div>
+  </div>
+
+  <!-- Admin -->
+  <div class="text-center mt-4">
+    <a href="#" id="adminLink" class="text-muted link-admin">
+      ⚙️ สำหรับเจ้าหน้าที่แผนกรถ
+    </a>
+  </div>
+
+</div>
+
+<script>
+  // โหลด dropdown
+  google.script.run.withSuccessHandler(populateDropdowns).getDropdownData();
+  google.script.run.withSuccessHandler(url => 
+    document.getElementById('adminLink').href = url + "?page=admin"
+  ).getScriptUrl();
+
+  function populateDropdowns(data) {
+    const vSelect = document.getElementById('vehicleSelect');
+    const dSelect = document.getElementById('driverSelect');
+
+    vSelect.innerHTML =
+      '<option value="">-- เลือกรถ --</option>' +
+      data.vehicles.map(v => `<option value="${v}">${v}</option>`).join('');
+
+    dSelect.innerHTML =
+      '<option value="">-- เลือกคนขับ หรือ ให้แอดมินจัดหา --</option>' +
+      data.drivers.map(d => `<option value="${d}">${d}</option>`).join('');
+  }
+
+  function submitForm(e) {
+    e.preventDefault();
+
+    const btn = document.getElementById('btnSubmit');
+    btn.disabled = true;
+    btn.innerHTML = '⏳ กำลังบันทึก...';
+
+    const form = document.getElementById('bookingForm');
+    const data = Object.fromEntries(new FormData(form).entries());
+
+    google.script.run.withSuccessHandler(res => {
+      alert(res);
+      form.reset();
+      btn.disabled = false;
+      btn.innerHTML = '✅ ยืนยันคำขอจองรถ';
+    }).saveBooking(data);
+  }
+</script>
+
+</body>
+</html>
