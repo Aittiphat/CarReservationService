@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>ระบบจัดการรถ (Admin)</title>
+
+  <!-- FullCalendar -->
+  <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <style>
+    body { font-family: 'Kanit', sans-serif; background: #f1f5f9; }
+
+    /* ===== Login Overlay ===== */
+    #loginOverlay {
+      position: fixed; inset: 0;
+      background: rgba(15,23,42,0.85);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999;
+    }
+    #loginBox {
+      background: #fff; border-radius: 20px;
+      padding: 40px; width: 360px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    #loginBox h5 { font-weight: 500; margin-bottom: 20px; }
+    #loginBox input {
+      border-radius: 12px; padding: 10px 14px;
+      border: 1px solid #e2e8f0; width: 100%; margin-bottom: 14px;
+      font-family: 'Kanit', sans-serif; font-size: 15px;
+    }
+    #loginBox input:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+    #loginBtn {
+      background: linear-gradient(135deg,#4f46e5,#6366f1);
+      color: #fff; border: none; border-radius: 12px;
+      padding: 10px 0; width: 100%; font-family: 'Kanit', sans-serif;
+      font-size: 15px; cursor: pointer; transition: .2s;
+    }
+    #loginBtn:hover { opacity: .9; transform: translateY(-1px); }
+    #loginError { color: #ef4444; font-size: 13px; margin-top: 8px; display: none; }
+
+    /* ===== Navbar ===== */
+    .navbar { background: linear-gradient(135deg,#1e293b,#334155); }
+    .navbar-brand { font-weight: 500; }
+
+    /* ===== Card ===== */
+    .card { border-radius: 16px; border: none; }
+    .card-header { border-radius: 16px 16px 0 0 !important; font-weight: 500; }
+
+    /* ===== Table ===== */
+    table th { font-weight: 500; font-size: 14px; background: #f8fafc; }
+    table td { vertical-align: middle; }
+
+    /* ===== Badge ===== */
+    .badge { font-size: 12px; padding: 6px 10px; border-radius: 8px; }
+
+    /* ===== Buttons ===== */
+    .btn-action { border-radius: 8px; padding: 4px 10px; }
+    .btn-success { background: #22c55e; border: none; }
+    .btn-danger  { background: #ef4444; border: none; }
+
+    /* ===== New-row highlight ===== */
+    .row-new { background-color: #fefce8 !important; }
+    .badge-new {
+      background: #f59e0b; color: #fff;
+      font-size: 10px; padding: 2px 6px; border-radius: 6px;
+      margin-left: 6px; animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; }
+      50%      { opacity: .4; }
+    }
+
+    /* ===== Refresh indicator ===== */
+    #refreshStatus {
+      font-size: 12px; color: #94a3b8;
+      float: right; margin-top: 4px;
+    }
+
+    /* ===== Calendar ===== */
+    #calendar { background: #fff; padding: 10px; border-radius: 12px; }
+
+    .table-hover tbody tr:hover { background-color: #f1f5f9; }
+
+    /* ===== Event Detail Modal ===== */
+    #eventOverlay {
+      position: fixed; inset: 0;
+      background: rgba(15,23,42,0.55);
+      display: none; align-items: center; justify-content: center;
+      z-index: 9998;
+    }
+    #eventBox {
+      background: #fff; border-radius: 20px;
+      padding: 32px 28px; max-width: 380px; width: 92%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      font-family: 'Kanit', sans-serif;
+    }
+    #eventBox .ev-title {
+      font-size: 17px; font-weight: 500; color: #1e293b;
+      margin-bottom: 16px; padding-bottom: 12px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    #eventBox .ev-row {
+      display: flex; gap: 10px; align-items: flex-start;
+      margin-bottom: 10px; font-size: 14px; color: #475569;
+    }
+    #eventBox .ev-row .ev-label {
+      min-width: 68px; font-weight: 500; color: #1e293b;
+    }
+    #eventBox .ev-badge {
+      display: inline-block; padding: 3px 10px; border-radius: 8px;
+      font-size: 12px; font-weight: 500; color: #fff;
+    }
+    #eventCloseBtn {
+      margin-top: 20px; width: 100%;
+      background: linear-gradient(135deg,#4f46e5,#6366f1);
+      color: #fff; border: none; border-radius: 12px;
+      padding: 10px; font-family: 'Kanit', sans-serif;
+      font-size: 15px; cursor: pointer; transition: .2s;
+    }
+    #eventCloseBtn:hover { opacity: .9; }
+
+    /* ===== Confirm Modal ===== */
+    #confirmOverlay {
+      position: fixed; inset: 0;
+      background: rgba(15,23,42,0.55);
+      display: none; align-items: center; justify-content: center;
+      z-index: 10000;
+    }
+    #confirmBox {
+      background: #fff; border-radius: 20px;
+      padding: 32px 28px; max-width: 340px; width: 88%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      font-family: 'Kanit', sans-serif; text-align: center;
+    }
+    #confirmMsg { font-size: 15px; color: #1e293b; margin-bottom: 22px; }
+    .confirm-btns { display: flex; gap: 10px; }
+    .confirm-btns button {
+      flex: 1; border: none; border-radius: 12px;
+      padding: 10px; font-family: 'Kanit', sans-serif;
+      font-size: 14px; cursor: pointer; transition: .2s;
+    }
+    #confirmYes { background: linear-gradient(135deg,#22c55e,#16a34a); color:#fff; }
+    #confirmNo  { background: #f1f5f9; color:#475569; }
+    #confirmYes:hover { opacity:.9; } #confirmNo:hover { background:#e2e8f0; }
+  </style>
+</head>
+
+<body>
+
+<!-- ===== Confirm Modal ===== -->
+<div id="confirmOverlay">
+  <div id="confirmBox">
+    <div style="font-size:36px;margin-bottom:12px;">❓</div>
+    <div id="confirmMsg"></div>
+    <div class="confirm-btns">
+      <button id="confirmNo"  onclick="closeConfirm(false)">ยกเลิก</button>
+      <button id="confirmYes" onclick="closeConfirm(true)">ยืนยัน</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Event Detail Modal ===== -->
+<div id="eventOverlay" onclick="if(event.target===this)closeEventModal()">
+  <div id="eventBox">
+    <div class="ev-title" id="evTitle"></div>
+    <div class="ev-row"><span class="ev-label">📅 ช่วงเวลา</span><span id="evTime"></span></div>
+    <div class="ev-row"><span class="ev-label">👤 ผู้จอง</span><span id="evBooker"></span></div>
+    <div class="ev-row"><span class="ev-label">🏢 แผนก</span><span id="evDept"></span></div>
+    <div class="ev-row"><span class="ev-label">🧑‍✈️ คนขับ</span><span id="evDriver"></span></div>
+    <div class="ev-row"><span class="ev-label">📌 สถานะ</span><span id="evStatus"></span></div>
+    <button id="eventCloseBtn" onclick="closeEventModal()">ปิด</button>
+  </div>
+</div>
+
+<!-- ===== Login Overlay ===== -->
+<div id="loginOverlay">
+  <div id="loginBox">
+    <div style="font-size:42px;margin-bottom:10px;">🔐</div>
+    <h5>เข้าสู่ระบบผู้ดูแล</h5>
+    <input type="password" id="passwordInput" placeholder="รหัสผ่าน" onkeydown="if(event.key==='Enter')doLogin()">
+    <button id="loginBtn" onclick="doLogin()">เข้าสู่ระบบ</button>
+    <div id="loginError">รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่</div>
+  </div>
+</div>
+
+<!-- ===== Navbar ===== -->
+<nav class="navbar navbar-dark mb-4 shadow-sm">
+  <div class="container-fluid px-4">
+    <span class="navbar-brand">🚗 ระบบหลังบ้าน - จัดการรถโรงพยาบาล</span>
+    <div class="d-flex align-items-center gap-3">
+      <span id="refreshStatus">⏳ กำลังโหลด...</span>
+      <a href="#" id="userLink" class="btn btn-sm btn-outline-light">← กลับหน้าจอง</a>
+      <button class="btn btn-sm btn-outline-danger" onclick="doLogout()">ออกจากระบบ</button>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid px-4">
+
+  <!-- ตาราง -->
+  <div class="card shadow mb-4">
+    <div class="card-header bg-warning d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <span>📋 รายการคำขอจองรถล่าสุด</span>
+      <span id="newBadgeHeader" class="badge-new" style="display:none;">🔔 มีรายการใหม่</span>
+    </div>
+    <!-- Filter Bar -->
+    <div class="px-3 pt-3 pb-2 bg-white border-bottom d-flex flex-wrap gap-2 align-items-center">
+      <div class="d-flex align-items-center gap-2">
+        <label class="text-muted" style="font-size:13px;white-space:nowrap;">🔍 กรองสถานะ:</label>
+        <select id="filterStatus" class="form-select form-select-sm" style="min-width:160px;border-radius:8px;" onchange="applyFilter()">
+          <option value="">ทั้งหมด</option>
+          <option value="รอดำเนินการ">⏳ รอดำเนินการ</option>
+          <option value="ดำเนินการเรียบร้อย">✅ เรียบร้อย</option>
+          <option value="ยกเลิก">❌ ยกเลิก</option>
+        </select>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <label class="text-muted" style="font-size:13px;white-space:nowrap;">🚗 รถ:</label>
+        <select id="filterVehicle" class="form-select form-select-sm" style="min-width:140px;border-radius:8px;" onchange="applyFilter()">
+          <option value="">ทั้งหมด</option>
+        </select>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <label class="text-muted" style="font-size:13px;white-space:nowrap;">🗓️ ช่วงวันที่:</label>
+        <input type="date" id="filterDateFrom" class="form-control form-control-sm" style="border-radius:8px;max-width:140px;" onchange="applyFilter()">
+        <span class="text-muted">–</span>
+        <input type="date" id="filterDateTo"   class="form-control form-control-sm" style="border-radius:8px;max-width:140px;" onchange="applyFilter()">
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <input type="text" id="filterSearch" class="form-control form-control-sm" placeholder="ค้นหาชื่อ / แผนก..." style="border-radius:8px;min-width:180px;" oninput="applyFilter()">
+        <button class="btn btn-sm btn-outline-secondary" style="border-radius:8px;" onclick="clearFilter()">✕ ล้าง</button>
+      </div>
+      <small id="filterCount" class="text-muted ms-auto"></small>
+    </div>
+    <div class="card-body table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>ID</th><th>ผู้จอง</th><th>แผนก</th><th>จุดหมาย</th>
+            <th>ไป</th><th>กลับ</th><th>รถ</th><th>คนขับ</th>
+            <th>สถานะ</th><th>จัดการ</th>
+          </tr>
+        </thead>
+        <tbody id="requestTableBody">
+          <tr><td colspan="10" class="text-center">กำลังโหลดข้อมูล...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Row -->
+  <div class="row g-4">
+    <!-- Calendar -->
+    <div class="col-lg-7">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">📅 ปฏิทินการใช้รถ</div>
+        <div class="card-body">
+          <div id="calendar" style="min-height:450px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="col-lg-5">
+      <div class="card shadow">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+          <span>📊 สรุปข้อมูลรายสัปดาห์</span>
+          <small id="statsWeekRange" class="opacity-75"></small>
+        </div>
+        <div class="card-body">
+          <!-- สรุปรายสัปดาห์ -->
+          <div class="row text-center g-3 mb-3" id="statsBox">
+            <div class="col-6">
+              <div class="p-3 rounded-3 bg-light">
+                <div class="fs-3 fw-bold text-secondary" id="statWeekTotal">–</div>
+                <small class="text-muted">คำขอสัปดาห์นี้</small>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="p-3 rounded-3 bg-light">
+                <div class="fs-3 fw-bold text-warning" id="statWeekPending">–</div>
+                <small class="text-muted">รอดำเนินการ</small>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="p-3 rounded-3 bg-light">
+                <div class="fs-3 fw-bold text-success" id="statWeekDone">–</div>
+                <small class="text-muted">เรียบร้อย</small>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="p-3 rounded-3 bg-light">
+                <div class="fs-3 fw-bold text-danger" id="statWeekCancel">–</div>
+                <small class="text-muted">ยกเลิก</small>
+              </div>
+            </div>
+          </div>
+          <!-- แถบแสดงสัดส่วน -->
+          <div class="mt-2">
+            <small class="text-muted d-block mb-1">สัดส่วนสถานะสัปดาห์นี้</small>
+            <div class="progress" style="height:10px;border-radius:8px;">
+              <div id="barDone"    class="progress-bar bg-success"   style="width:0%" title="เรียบร้อย"></div>
+              <div id="barPending" class="progress-bar bg-warning"   style="width:0%" title="รอดำเนินการ"></div>
+              <div id="barCancel"  class="progress-bar bg-danger"    style="width:0%" title="ยกเลิก"></div>
+            </div>
+            <div class="d-flex justify-content-between mt-1" style="font-size:11px;color:#94a3b8;">
+              <span>🟢 เรียบร้อย</span><span>🟡 รอดำเนินการ</span><span>🔴 ยกเลิก</span>
+            </div>
+          </div>
+          <hr class="my-3">
+          <!-- ยอดรวมทั้งหมด -->
+          <div class="row text-center g-2">
+            <div class="col-4">
+              <div class="p-2 rounded-3 border">
+                <div class="fs-5 fw-bold text-secondary" id="statTotal">–</div>
+                <small class="text-muted" style="font-size:11px;">ทั้งหมด</small>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="p-2 rounded-3 border">
+                <div class="fs-5 fw-bold text-warning" id="statPending">–</div>
+                <small class="text-muted" style="font-size:11px;">รอดำเนินการ</small>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="p-2 rounded-3 border">
+                <div class="fs-5 fw-bold text-danger" id="statCancel">–</div>
+                <small class="text-muted" style="font-size:11px;">ยกเลิกรวม</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Scripts ===== -->
+<script>
+  /* ========== CONFIG ========== */
+  // ใส่ Apps Script Deployment URL ของคุณที่นี่
+  const API_URL = 'https://script.google.com/macros/s/AKfycbzGZtBDetdwe3BZq5ArXbvQ-VH1-KQNeQWGIIRyQhmJjNK6Ah1PHd37ZpCFQxoyWOGW/exec';
+
+  async function api(action) {
+    const res = await fetch(`${API_URL}?action=${action}`);
+    return res.json();
+  }
+
+  async function apiPost(body) {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify(body)
+    });
+    return res.json();
+  }
+
+  /* ========== AUTH ========== */
+  let isAuthenticated = false;
+
+  function doLogin() {
+    const pwd = document.getElementById('passwordInput').value;
+    const btn = document.getElementById('loginBtn');
+    btn.textContent = '⏳ กำลังตรวจสอบ...';
+    btn.disabled = true;
+
+    apiPost({ action: 'verifyAdminPassword', password: pwd })
+      .then(res => {
+        btn.textContent = 'เข้าสู่ระบบ';
+        btn.disabled = false;
+        if (res.ok) {
+          isAuthenticated = true;
+          document.getElementById('loginOverlay').style.display = 'none';
+          sessionStorage.setItem('adminAuth', '1');
+        } else {
+          document.getElementById('loginError').style.display = 'block';
+          document.getElementById('passwordInput').value = '';
+        }
+      })
+      .catch(() => {
+        btn.textContent = 'เข้าสู่ระบบ';
+        btn.disabled = false;
+        document.getElementById('loginError').textContent = 'เกิดข้อผิดพลาด กรุณาลองใหม่';
+        document.getElementById('loginError').style.display = 'block';
+      });
+  }
+
+  function doLogout() {
+    isAuthenticated = false;
+    sessionStorage.removeItem('adminAuth');
+    location.reload();
+  }
+
+  // ถ้า session ยังอยู่ (refresh หน้า) ไม่ต้อง login ซ้ำ (soft bypass ผ่าน session)
+  if (sessionStorage.getItem('adminAuth') === '1') {
+    isAuthenticated = true;
+    document.getElementById('loginOverlay').style.display = 'none';
+  }
+
+  /* ========== DATA ========== */
+  let lastRowCount  = 0;
+  let lastServerTime = 0;
+  let allData = [];           // เก็บข้อมูลทั้งหมดสำหรับ filter
+  const REFRESH_INTERVAL = 30000; // 30 วินาที
+
+  // userLink ชี้กลับหน้า index
+  document.getElementById('userLink').href = 'index.html';
+
+  // โหลดครั้งแรก
+  loadRequests();
+  loadCalendar();
+
+  // Auto-refresh
+  setInterval(() => {
+    loadRequests(true);   // true = เช็คว่ามีใหม่
+    loadCalendar();
+  }, REFRESH_INTERVAL);
+
+  /* ---------- loadRequests ---------- */
+  async function loadRequests(isAutoRefresh = false) {
+    try {
+      const result = await api('getRequests');
+      displayRequests(result, isAutoRefresh);
+    } catch(err) {
+      console.error('getRequests failed', err);
+    }
+  }
+
+  function displayRequests(result, isAutoRefresh) {
+    const data      = result.rows;
+    const serverTime = result.serverTime;
+    const headerBadge = document.getElementById('newBadgeHeader');
+
+    // เก็บข้อมูลทั้งหมดไว้สำหรับ filter
+    allData = data;
+
+    // อัปเดตสถิติ
+    updateStats(data);
+
+    // ตรวจว่ามีแถวใหม่เพิ่มขึ้นหรือไม่
+    if (isAutoRefresh && data.length > lastRowCount) {
+      headerBadge.style.display = 'inline';
+    }
+    lastRowCount  = data.length;
+    lastServerTime = serverTime;
+
+    // อัปเดต status bar
+    const now = new Date();
+    document.getElementById('refreshStatus').textContent =
+      `🔄 อัปเดตล่าสุด: ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+
+    // อัปเดต dropdown รถ
+    updateVehicleFilter(data);
+
+    // แสดงผลตาม filter ที่เลือกอยู่
+    applyFilter(isAutoRefresh);
+  }
+
+  /* ---------- updateVehicleFilter ---------- */
+  function updateVehicleFilter(data) {
+    const sel = document.getElementById('filterVehicle');
+    const current = sel.value;
+    const vehicles = [...new Set(data.map(r => r[9]).filter(Boolean))].sort();
+    sel.innerHTML = '<option value="">ทั้งหมด</option>' +
+      vehicles.map(v => `<option value="${v}"${v===current?' selected':''}>${v}</option>`).join('');
+  }
+
+  /* ---------- applyFilter ---------- */
+  function applyFilter(isAutoRefresh = false) {
+    const filterStatus  = document.getElementById('filterStatus').value;
+    const filterVehicle = document.getElementById('filterVehicle').value;
+    const filterSearch  = document.getElementById('filterSearch').value.trim().toLowerCase();
+    const filterFrom    = document.getElementById('filterDateFrom').value; // yyyy-MM-dd
+    const filterTo      = document.getElementById('filterDateTo').value;
+
+    const tbody      = document.getElementById('requestTableBody');
+    const headerBadge = document.getElementById('newBadgeHeader');
+
+    if (!allData || allData.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted">ไม่มีข้อมูล</td></tr>';
+      document.getElementById('filterCount').textContent = '';
+      return;
+    }
+
+    // --- ซ่อนแถว "ดำเนินการเรียบร้อย"/"ยกเลิก" เมื่อขึ้นสัปดาห์ถัดไป ---
+    // คำนวณต้นสัปดาห์ปัจจุบัน (จันทร์ 00:00 น.)
+    const _now = new Date(); _now.setHours(0,0,0,0);
+    const _dow = _now.getDay(); // 0=อาทิตย์
+    const _diffMon = (_dow === 0) ? -6 : 1 - _dow;
+    const weekStart = new Date(_now);
+    weekStart.setDate(_now.getDate() + _diffMon); // จันทร์ 00:00 ของสัปดาห์นี้
+
+    function parseDateDisplay(str) {
+      if (!str) return null;
+      str = str.toString().trim();
+      const dmy = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      if (dmy) return new Date(+dmy[3], +dmy[2]-1, +dmy[1]);
+      const ymd = str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (ymd) return new Date(+ymd[1], +ymd[2]-1, +ymd[3]);
+      return null;
+    }
+
+    let visibleData = allData.filter(row => {
+      const st = row[11];
+      if (st !== 'ดำเนินการเรียบร้อย' && st !== 'ยกเลิก') return true;
+      // ใช้วันออกเดินทาง (col D, index 3) เป็นจุดอ้างอิง
+      const dateOut = parseDateDisplay(row[3]);
+      if (!dateOut) return true;
+      const d = new Date(dateOut); d.setHours(0,0,0,0);
+      // แสดงต่อเนื่องตลอดสัปดาห์ที่อัปเดต ซ่อนเมื่อขึ้นสัปดาห์ถัดไป
+      return d >= weekStart;
+    });
+
+    // --- Filter เพิ่มเติม ---
+    if (filterStatus) {
+      visibleData = visibleData.filter(r => r[11] === filterStatus);
+    }
+    if (filterVehicle) {
+      visibleData = visibleData.filter(r => r[9] === filterVehicle);
+    }
+    if (filterSearch) {
+      visibleData = visibleData.filter(r =>
+        (r[1]||'').toLowerCase().includes(filterSearch) ||
+        (r[2]||'').toLowerCase().includes(filterSearch) ||
+        (r[7]||'').toLowerCase().includes(filterSearch)
+      );
+    }
+    if (filterFrom) {
+      visibleData = visibleData.filter(r => {
+        const d = parseDateDisplay(r[3]);
+        if (!d) return true;
+        return d >= new Date(filterFrom);
+      });
+    }
+    if (filterTo) {
+      visibleData = visibleData.filter(r => {
+        const d = parseDateDisplay(r[3]);
+        if (!d) return true;
+        const toDate = new Date(filterTo); toDate.setHours(23,59,59,999);
+        return d <= toDate;
+      });
+    }
+
+    document.getElementById('filterCount').textContent =
+      visibleData.length > 0 ? `แสดง ${visibleData.length} รายการ` : '';
+
+    if (visibleData.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted">ไม่พบรายการที่ตรงกับเงื่อนไข</td></tr>';
+      return;
+    }
+
+    // เรียงจากใหม่ไปเก่า
+    tbody.innerHTML = '';
+    [...visibleData].reverse().forEach((row, idx) => {
+      const id     = row[0];
+      const status = row[11];
+
+      const badgeClass =
+        status === 'ดำเนินการเรียบร้อย' ? 'bg-success' :
+        status === 'ยกเลิก'             ? 'bg-danger'  : 'bg-secondary';
+
+      const rowClass = (idx === 0 && isAutoRefresh && allData.length > lastRowCount) ? 'row-new' : '';
+
+      tbody.innerHTML += `
+        <tr class="${rowClass}">
+          <td><small class="text-muted">${id}</small></td>
+          <td>${row[1]}</td>
+          <td>${row[2]}</td>
+          <td>${row[7]}</td>
+          <td>${row[3]} ${row[4]}</td>
+          <td>${row[5]} ${row[6]}</td>
+          <td>${row[9] || '-'}</td>
+          <td>${row[10] || '-'}</td>
+          <td><span class="badge ${badgeClass}">${status}</span></td>
+          <td>
+            <button class="btn btn-success btn-sm btn-action"
+              onclick="requireAuth(() => updateStatus('${id}','ดำเนินการเรียบร้อย'))">✓</button>
+            <button class="btn btn-danger btn-sm btn-action"
+              onclick="requireAuth(() => updateStatus('${id}','ยกเลิก'))">✗</button>
+          </td>
+        </tr>`;
+    });
+  }
+
+  /* ---------- clearFilter ---------- */
+  function clearFilter() {
+    document.getElementById('filterStatus').value  = '';
+    document.getElementById('filterVehicle').value = '';
+    document.getElementById('filterSearch').value  = '';
+    document.getElementById('filterDateFrom').value = '';
+    document.getElementById('filterDateTo').value   = '';
+    applyFilter();
+  }
+
+  /* ---------- requireAuth (ปุ่ม action ต้อง login ก่อน) ---------- */
+  function requireAuth(fn) {
+    if (!isAuthenticated) {
+      document.getElementById('loginOverlay').style.display = 'flex';
+      return;
+    }
+    fn();
+  }
+
+  /* ---------- updateStatus ---------- */
+  function updateStatus(id, status) {
+    showConfirm(`ต้องการ "${status}" คำขอนี้ใช่หรือไม่?`, async () => {
+      try {
+        await apiPost({ action: 'updateStatus', id, status });
+        document.getElementById('newBadgeHeader').style.display = 'none';
+        loadRequests();
+        loadCalendar();
+      } catch(err) {
+        console.error('updateStatus failed', err);
+      }
+    });
+  }
+
+  /* ---------- updateStats (สรุปรายสัปดาห์) ---------- */
+  function updateStats(data) {
+    // --- ยอดรวมทั้งหมด ---
+    document.getElementById('statTotal').textContent   = data.length;
+    document.getElementById('statPending').textContent = data.filter(r => r[11] === 'รอดำเนินการ').length;
+    document.getElementById('statCancel').textContent  = data.filter(r => r[11] === 'ยกเลิก').length;
+
+    // --- สัปดาห์นี้ (จันทร์–อาทิตย์) ---
+    const today = new Date();
+    const dow = today.getDay(); // 0=อาทิตย์
+    const diffMon = (dow === 0) ? -6 : 1 - dow;
+    const weekStart = new Date(today); weekStart.setHours(0,0,0,0); weekStart.setDate(today.getDate() + diffMon);
+    const weekEnd   = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 7);
+
+    // แสดงช่วงสัปดาห์
+    const fmtShort = d => d.toLocaleDateString('th-TH',{day:'numeric',month:'short'});
+    document.getElementById('statsWeekRange').textContent = fmtShort(weekStart) + ' – ' + fmtShort(new Date(weekEnd.getTime()-1));
+
+    function parseDateDisplay(str) {
+      if (!str) return null;
+      str = str.toString().trim();
+      const dmy = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      if (dmy) return new Date(+dmy[3], +dmy[2]-1, +dmy[1]);
+      const ymd = str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (ymd) return new Date(+ymd[1], +ymd[2]-1, +ymd[3]);
+      return null;
+    }
+
+    const weekRows = data.filter(r => {
+      const d = parseDateDisplay(r[3]);
+      return d && d >= weekStart && d < weekEnd;
+    });
+
+    const wTotal   = weekRows.length;
+    const wPending = weekRows.filter(r => r[11] === 'รอดำเนินการ').length;
+    const wDone    = weekRows.filter(r => r[11] === 'ดำเนินการเรียบร้อย').length;
+    const wCancel  = weekRows.filter(r => r[11] === 'ยกเลิก').length;
+
+    document.getElementById('statWeekTotal').textContent   = wTotal;
+    document.getElementById('statWeekPending').textContent = wPending;
+    document.getElementById('statWeekDone').textContent    = wDone;
+    document.getElementById('statWeekCancel').textContent  = wCancel;
+
+    // แถบ progress
+    const pDone    = wTotal ? Math.round(wDone/wTotal*100)    : 0;
+    const pPending = wTotal ? Math.round(wPending/wTotal*100) : 0;
+    const pCancel  = wTotal ? Math.round(wCancel/wTotal*100)  : 0;
+    document.getElementById('barDone').style.width    = pDone    + '%';
+    document.getElementById('barPending').style.width = pPending + '%';
+    document.getElementById('barCancel').style.width  = pCancel  + '%';
+  }
+
+  /* ---------- Calendar ---------- */
+  let calendarInstance = null;
+
+  async function loadCalendar() {
+    try {
+      const events = await api('getCalendarEvents');
+      renderCalendar(events);
+    } catch(err) {
+      console.error('getCalendarEvents failed', err);
+    }
+  }
+
+  function renderCalendar(events) {
+    const calendarEl = document.getElementById('calendar');
+
+    if (calendarInstance) {
+      calendarInstance.removeAllEvents();
+      calendarInstance.addEventSource(events);
+      return;
+    }
+
+    calendarEl.innerHTML = '';
+    calendarInstance = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      locale: 'th',
+      headerToolbar: {
+        left:   'prev,next today',
+        center: 'title',
+        right:  'dayGridMonth,timeGridWeek,listWeek'
+      },
+      events: events,
+      eventClick: function(info) {
+        const p   = info.event.extendedProps;
+        const fmt = dt => dt ? dt.toLocaleString('th-TH',{
+          year:'numeric', month:'short', day:'numeric',
+          hour:'2-digit', minute:'2-digit'}) : '';
+        showEventModal({
+          title:  info.event.title,
+          start:  fmt(info.event.start),
+          end:    fmt(info.event.end),
+          booker: p.booker,
+          dept:   p.department,
+          driver: p.driver,
+          status: p.status,
+          color:  info.event.backgroundColor || '#6c757d'
+        });
+      }
+    });
+    calendarInstance.render();
+  }
+
+
+  /* ---------- Confirm Modal ---------- */
+  let _confirmCallback = null;
+  function showConfirm(msg, cb) {
+    document.getElementById('confirmMsg').textContent = msg;
+    _confirmCallback = cb;
+    document.getElementById('confirmOverlay').style.display = 'flex';
+  }
+  function closeConfirm(yes) {
+    document.getElementById('confirmOverlay').style.display = 'none';
+    if (yes && _confirmCallback) _confirmCallback();
+    _confirmCallback = null;
+  }
+  /* ---------- Event Detail Modal ---------- */
+  function showEventModal(ev) {
+    document.getElementById('evTitle').textContent  = '🚗 ' + ev.title;
+    document.getElementById('evTime').textContent   = ev.start + (ev.end ? ' → ' + ev.end : '');
+    document.getElementById('evBooker').textContent = ev.booker || '-';
+    document.getElementById('evDept').textContent   = ev.dept   || '-';
+    document.getElementById('evDriver').textContent = ev.driver || '-';
+    const badge = document.getElementById('evStatus');
+    badge.textContent       = ev.status;
+    badge.className         = 'ev-badge';
+    badge.style.background  = ev.color;
+    document.getElementById('eventOverlay').style.display = 'flex';
+  }
+
+  function closeEventModal() {
+    document.getElementById('eventOverlay').style.display = 'none';
+  }
+
+  // ปิดด้วย Escape
+  document.addEventListener('keydown', e => { if(e.key==='Escape') closeEventModal(); });
+</script>
+
+</body>
+</html>
