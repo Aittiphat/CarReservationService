@@ -14,86 +14,191 @@
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
 
   <style>
-    body {
+    body { font-family: 'Kanit', sans-serif; background: #f1f5f9; }
+
+    /* ===== Login Overlay ===== */
+    #loginOverlay {
+      position: fixed; inset: 0;
+      background: rgba(15,23,42,0.85);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999;
+    }
+    #loginBox {
+      background: #fff; border-radius: 20px;
+      padding: 40px; width: 360px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    #loginBox h5 { font-weight: 500; margin-bottom: 20px; }
+    #loginBox input {
+      border-radius: 12px; padding: 10px 14px;
+      border: 1px solid #e2e8f0; width: 100%; margin-bottom: 14px;
+      font-family: 'Kanit', sans-serif; font-size: 15px;
+    }
+    #loginBox input:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+    #loginBtn {
+      background: linear-gradient(135deg,#4f46e5,#6366f1);
+      color: #fff; border: none; border-radius: 12px;
+      padding: 10px 0; width: 100%; font-family: 'Kanit', sans-serif;
+      font-size: 15px; cursor: pointer; transition: .2s;
+    }
+    #loginBtn:hover { opacity: .9; transform: translateY(-1px); }
+    #loginError { color: #ef4444; font-size: 13px; margin-top: 8px; display: none; }
+
+    /* ===== Navbar ===== */
+    .navbar { background: linear-gradient(135deg,#1e293b,#334155); }
+    .navbar-brand { font-weight: 500; }
+
+    /* ===== Card ===== */
+    .card { border-radius: 16px; border: none; }
+    .card-header { border-radius: 16px 16px 0 0 !important; font-weight: 500; }
+
+    /* ===== Table ===== */
+    table th { font-weight: 500; font-size: 14px; background: #f8fafc; }
+    table td { vertical-align: middle; }
+
+    /* ===== Badge ===== */
+    .badge { font-size: 12px; padding: 6px 10px; border-radius: 8px; }
+
+    /* ===== Buttons ===== */
+    .btn-action { border-radius: 8px; padding: 4px 10px; }
+    .btn-success { background: #22c55e; border: none; }
+    .btn-danger  { background: #ef4444; border: none; }
+
+    /* ===== New-row highlight ===== */
+    .row-new { background-color: #fefce8 !important; }
+    .badge-new {
+      background: #f59e0b; color: #fff;
+      font-size: 10px; padding: 2px 6px; border-radius: 6px;
+      margin-left: 6px; animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; }
+      50%      { opacity: .4; }
+    }
+
+    /* ===== Refresh indicator ===== */
+    #refreshStatus {
+      font-size: 12px; color: #94a3b8;
+      float: right; margin-top: 4px;
+    }
+
+    /* ===== Calendar ===== */
+    #calendar { background: #fff; padding: 10px; border-radius: 12px; }
+
+    .table-hover tbody tr:hover { background-color: #f1f5f9; }
+
+    /* ===== Event Detail Modal ===== */
+    #eventOverlay {
+      position: fixed; inset: 0;
+      background: rgba(15,23,42,0.55);
+      display: none; align-items: center; justify-content: center;
+      z-index: 9998;
+    }
+    #eventBox {
+      background: #fff; border-radius: 20px;
+      padding: 32px 28px; max-width: 380px; width: 92%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
       font-family: 'Kanit', sans-serif;
-      background: #f1f5f9;
     }
+    #eventBox .ev-title {
+      font-size: 17px; font-weight: 500; color: #1e293b;
+      margin-bottom: 16px; padding-bottom: 12px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    #eventBox .ev-row {
+      display: flex; gap: 10px; align-items: flex-start;
+      margin-bottom: 10px; font-size: 14px; color: #475569;
+    }
+    #eventBox .ev-row .ev-label {
+      min-width: 68px; font-weight: 500; color: #1e293b;
+    }
+    #eventBox .ev-badge {
+      display: inline-block; padding: 3px 10px; border-radius: 8px;
+      font-size: 12px; font-weight: 500; color: #fff;
+    }
+    #eventCloseBtn {
+      margin-top: 20px; width: 100%;
+      background: linear-gradient(135deg,#4f46e5,#6366f1);
+      color: #fff; border: none; border-radius: 12px;
+      padding: 10px; font-family: 'Kanit', sans-serif;
+      font-size: 15px; cursor: pointer; transition: .2s;
+    }
+    #eventCloseBtn:hover { opacity: .9; }
 
-    /* Navbar */
-    .navbar {
-      background: linear-gradient(135deg, #1e293b, #334155);
+    /* ===== Confirm Modal ===== */
+    #confirmOverlay {
+      position: fixed; inset: 0;
+      background: rgba(15,23,42,0.55);
+      display: none; align-items: center; justify-content: center;
+      z-index: 10000;
     }
-
-    .navbar-brand {
-      font-weight: 500;
+    #confirmBox {
+      background: #fff; border-radius: 20px;
+      padding: 32px 28px; max-width: 340px; width: 88%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      font-family: 'Kanit', sans-serif; text-align: center;
     }
-
-    /* Card */
-    .card {
-      border-radius: 16px;
-      border: none;
+    #confirmMsg { font-size: 15px; color: #1e293b; margin-bottom: 22px; }
+    .confirm-btns { display: flex; gap: 10px; }
+    .confirm-btns button {
+      flex: 1; border: none; border-radius: 12px;
+      padding: 10px; font-family: 'Kanit', sans-serif;
+      font-size: 14px; cursor: pointer; transition: .2s;
     }
-
-    .card-header {
-      border-radius: 16px 16px 0 0 !important;
-      font-weight: 500;
-    }
-
-    /* Table */
-    table th {
-      font-weight: 500;
-      font-size: 14px;
-      background: #f8fafc;
-    }
-
-    table td {
-      vertical-align: middle;
-    }
-
-    /* Badge */
-    .badge {
-      font-size: 12px;
-      padding: 6px 10px;
-      border-radius: 8px;
-    }
-
-    /* Buttons */
-    .btn-action {
-      border-radius: 8px;
-      padding: 4px 10px;
-    }
-
-    .btn-success {
-      background: #22c55e;
-      border: none;
-    }
-
-    .btn-danger {
-      background: #ef4444;
-      border: none;
-    }
-
-    /* Calendar */
-    #calendar {
-      background: #fff;
-      padding: 10px;
-      border-radius: 12px;
-    }
-
-    /* Hover effect */
-    .table-hover tbody tr:hover {
-      background-color: #f1f5f9;
-    }
+    #confirmYes { background: linear-gradient(135deg,#22c55e,#16a34a); color:#fff; }
+    #confirmNo  { background: #f1f5f9; color:#475569; }
+    #confirmYes:hover { opacity:.9; } #confirmNo:hover { background:#e2e8f0; }
   </style>
 </head>
 
 <body>
 
-<!-- Navbar -->
+<!-- ===== Confirm Modal ===== -->
+<div id="confirmOverlay">
+  <div id="confirmBox">
+    <div style="font-size:36px;margin-bottom:12px;">❓</div>
+    <div id="confirmMsg"></div>
+    <div class="confirm-btns">
+      <button id="confirmNo"  onclick="closeConfirm(false)">ยกเลิก</button>
+      <button id="confirmYes" onclick="closeConfirm(true)">ยืนยัน</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Event Detail Modal ===== -->
+<div id="eventOverlay" onclick="if(event.target===this)closeEventModal()">
+  <div id="eventBox">
+    <div class="ev-title" id="evTitle"></div>
+    <div class="ev-row"><span class="ev-label">📅 ช่วงเวลา</span><span id="evTime"></span></div>
+    <div class="ev-row"><span class="ev-label">👤 ผู้จอง</span><span id="evBooker"></span></div>
+    <div class="ev-row"><span class="ev-label">🏢 แผนก</span><span id="evDept"></span></div>
+    <div class="ev-row"><span class="ev-label">🧑‍✈️ คนขับ</span><span id="evDriver"></span></div>
+    <div class="ev-row"><span class="ev-label">📌 สถานะ</span><span id="evStatus"></span></div>
+    <button id="eventCloseBtn" onclick="closeEventModal()">ปิด</button>
+  </div>
+</div>
+
+<!-- ===== Login Overlay ===== -->
+<div id="loginOverlay">
+  <div id="loginBox">
+    <div style="font-size:42px;margin-bottom:10px;">🔐</div>
+    <h5>เข้าสู่ระบบผู้ดูแล</h5>
+    <input type="password" id="passwordInput" placeholder="รหัสผ่าน" onkeydown="if(event.key==='Enter')doLogin()">
+    <button id="loginBtn" onclick="doLogin()">เข้าสู่ระบบ</button>
+    <div id="loginError">รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่</div>
+  </div>
+</div>
+
+<!-- ===== Navbar ===== -->
 <nav class="navbar navbar-dark mb-4 shadow-sm">
   <div class="container-fluid px-4">
     <span class="navbar-brand">🚗 ระบบหลังบ้าน - จัดการรถโรงพยาบาล</span>
-    <a href="#" id="userLink" class="btn btn-sm btn-outline-light">← กลับหน้าจอง</a>
+    <div class="d-flex align-items-center gap-3">
+      <span id="refreshStatus">⏳ กำลังโหลด...</span>
+      <a href="#" id="userLink" class="btn btn-sm btn-outline-light">← กลับหน้าจอง</a>
+      <button class="btn btn-sm btn-outline-danger" onclick="doLogout()">ออกจากระบบ</button>
+    </div>
   </div>
 </nav>
 
@@ -101,23 +206,17 @@
 
   <!-- ตาราง -->
   <div class="card shadow mb-4">
-    <div class="card-header bg-warning">
-      📋 รายการคำขอจองรถล่าสุด
+    <div class="card-header bg-warning d-flex justify-content-between align-items-center">
+      <span>📋 รายการคำขอจองรถล่าสุด</span>
+      <span id="newBadgeHeader" class="badge-new" style="display:none;">🔔 มีรายการใหม่</span>
     </div>
     <div class="card-body table-responsive">
       <table class="table table-hover align-middle">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>ผู้จอง</th>
-            <th>แผนก</th>
-            <th>จุดหมาย</th>
-            <th>ไป</th>
-            <th>กลับ</th>
-            <th>รถ</th>
-            <th>คนขับ</th>
-            <th>สถานะ</th>
-            <th>จัดการ</th>
+            <th>ID</th><th>ผู้จอง</th><th>แผนก</th><th>จุดหมาย</th>
+            <th>ไป</th><th>กลับ</th><th>รถ</th><th>คนขับ</th>
+            <th>สถานะ</th><th>จัดการ</th>
           </tr>
         </thead>
         <tbody id="requestTableBody">
@@ -129,15 +228,12 @@
 
   <!-- Row -->
   <div class="row g-4">
-
     <!-- Calendar -->
     <div class="col-lg-7">
       <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-          📅 ปฏิทินการใช้รถ
-        </div>
+        <div class="card-header bg-primary text-white">📅 ปฏิทินการใช้รถ</div>
         <div class="card-body">
-          <div id="calendar" style="min-height: 450px;"></div>
+          <div id="calendar" style="min-height:450px;"></div>
         </div>
       </div>
     </div>
@@ -145,55 +241,178 @@
     <!-- Stats -->
     <div class="col-lg-5">
       <div class="card shadow">
-        <div class="card-header bg-success text-white">
-          📊 สถิติการใช้งาน
-        </div>
-        <div class="card-body text-center">
-          <p class="text-muted">รองรับ Chart.js / Dashboard เพิ่มเติมได้</p>
-          <div class="py-4">
-            <h2 class="text-success">🚗</h2>
-            <small class="text-muted">ระบบพร้อมใช้งาน</small>
+        <div class="card-header bg-success text-white">📊 สถิติการใช้งาน</div>
+        <div class="card-body">
+          <div class="row text-center g-3" id="statsBox">
+            <div class="col-4">
+              <div class="p-3 rounded-3 bg-light">
+                <div class="fs-3 fw-bold text-secondary" id="statTotal">–</div>
+                <small class="text-muted">คำขอทั้งหมด</small>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="p-3 rounded-3 bg-light">
+                <div class="fs-3 fw-bold text-warning" id="statPending">–</div>
+                <small class="text-muted">รอดำเนินการ</small>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="p-3 rounded-3 bg-light">
+                <div class="fs-3 fw-bold text-success" id="statDone">–</div>
+                <small class="text-muted">เรียบร้อย</small>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-
   </div>
 </div>
 
+<!-- ===== Scripts ===== -->
 <script>
-  google.script.run.withSuccessHandler(url => 
-    document.getElementById('userLink').href = url
-  ).getScriptUrl();
+  /* ========== AUTH ========== */
+  let isAuthenticated = false;
 
+  function doLogin() {
+    const pwd = document.getElementById('passwordInput').value;
+    const btn = document.getElementById('loginBtn');
+    btn.textContent = '⏳ กำลังตรวจสอบ...';
+    btn.disabled = true;
+
+    google.script.run
+      .withSuccessHandler(ok => {
+        btn.textContent = 'เข้าสู่ระบบ';
+        btn.disabled = false;
+        if (ok) {
+          isAuthenticated = true;
+          document.getElementById('loginOverlay').style.display = 'none';
+          sessionStorage.setItem('adminAuth', '1');
+        } else {
+          document.getElementById('loginError').style.display = 'block';
+          document.getElementById('passwordInput').value = '';
+        }
+      })
+      .withFailureHandler(() => {
+        btn.textContent = 'เข้าสู่ระบบ';
+        btn.disabled = false;
+        document.getElementById('loginError').textContent = 'เกิดข้อผิดพลาด กรุณาลองใหม่';
+        document.getElementById('loginError').style.display = 'block';
+      })
+      .verifyAdminPassword(pwd);
+  }
+
+  function doLogout() {
+    isAuthenticated = false;
+    sessionStorage.removeItem('adminAuth');
+    location.reload();
+  }
+
+  // ถ้า session ยังอยู่ (refresh หน้า) ไม่ต้อง login ซ้ำ (soft bypass ผ่าน session)
+  if (sessionStorage.getItem('adminAuth') === '1') {
+    isAuthenticated = true;
+    document.getElementById('loginOverlay').style.display = 'none';
+  }
+
+  /* ========== DATA ========== */
+  let lastRowCount  = 0;
+  let lastServerTime = 0;
+  const REFRESH_INTERVAL = 30000; // 30 วินาที
+
+  google.script.run
+    .withSuccessHandler(url => document.getElementById('userLink').href = url)
+    .getScriptUrl();
+
+  // โหลดครั้งแรก
   loadRequests();
   loadCalendar();
 
-  function loadRequests() {
-    google.script.run.withSuccessHandler(displayRequests).getRequests();
+  // Auto-refresh
+  setInterval(() => {
+    loadRequests(true);   // true = เช็คว่ามีใหม่
+    loadCalendar();
+  }, REFRESH_INTERVAL);
+
+  /* ---------- loadRequests ---------- */
+  function loadRequests(isAutoRefresh = false) {
+    google.script.run
+      .withSuccessHandler(result => displayRequests(result, isAutoRefresh))
+      .withFailureHandler(err => console.error('getRequests failed', err))
+      .getRequests();
   }
 
-  function displayRequests(data) {
-    const tbody = document.getElementById('requestTableBody');
-    tbody.innerHTML = '';
+  function displayRequests(result, isAutoRefresh) {
+    const data      = result.rows;
+    const serverTime = result.serverTime;
+    const tbody     = document.getElementById('requestTableBody');
+    const headerBadge = document.getElementById('newBadgeHeader');
 
-    if (data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="10" class="text-center">ไม่มีข้อมูล</td></tr>';
+    // อัปเดตสถิติ
+    updateStats(data);
+
+    // ตรวจว่ามีแถวใหม่เพิ่มขึ้นหรือไม่
+    if (isAutoRefresh && data.length > lastRowCount) {
+      headerBadge.style.display = 'inline';
+      // เล่นเสียงหรือ notification ได้เพิ่มที่นี่
+    }
+    lastRowCount  = data.length;
+    lastServerTime = serverTime;
+
+    // อัปเดต status bar
+    const now = new Date();
+    document.getElementById('refreshStatus').textContent =
+      `🔄 อัปเดตล่าสุด: ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+
+    tbody.innerHTML = '';
+    if (!data || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted">ไม่มีข้อมูล</td></tr>';
       return;
     }
 
-    data.reverse().forEach(row => {
-      const id = row[0];
+    // --- กรองแถว "ดำเนินการเรียบร้อย" ที่วันกลับผ่านพ้นไปแล้ว (ขึ้นวันถัดไป) ---
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    function parseDateDisplay(str) {
+      if (!str) return null;
+      str = str.toString().trim();
+      const dmy = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      if (dmy) return new Date(+dmy[3], +dmy[2] - 1, +dmy[1]);
+      const ymd = str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (ymd) return new Date(+ymd[1], +ymd[2] - 1, +ymd[3]);
+      return null;
+    }
+
+    const visibleData = data.filter(row => {
+      const st = row[11];
+      // แสดงเสมอถ้าเป็นสถานะ "รอดำเนินการ"
+      if (st !== 'ดำเนินการเรียบร้อย' && st !== 'ยกเลิก') return true;
+      // ดำเนินการเรียบร้อย / ยกเลิก → ซ่อนเมื่อวันกลับขึ้นวันถัดไปแล้ว
+      const dateIn = parseDateDisplay(row[5]);
+      if (!dateIn) return true;
+      const d = new Date(dateIn); d.setHours(0,0,0,0);
+      return d >= todayStart;
+    });
+
+    if (visibleData.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted">ไม่มีรายการที่รอดำเนินการ</td></tr>';
+      return;
+    }
+
+    // เรียงจากใหม่ไปเก่า
+    [...visibleData].reverse().forEach((row, idx) => {
+      const id     = row[0];
       const status = row[11];
 
-      let badgeClass =
+      const badgeClass =
         status === 'ดำเนินการเรียบร้อย' ? 'bg-success' :
-        status === 'ยกเลิก' ? 'bg-danger' :
-        'bg-secondary';
+        status === 'ยกเลิก'             ? 'bg-danger'  : 'bg-secondary';
 
-      let tr = `
-        <tr>
-          <td>${id}</td>
+      const rowClass = (idx === 0 && isAutoRefresh && data.length > lastRowCount) ? 'row-new' : '';
+
+      tbody.innerHTML += `
+        <tr class="${rowClass}">
+          <td><small class="text-muted">${id}</small></td>
           <td>${row[1]}</td>
           <td>${row[2]}</td>
           <td>${row[7]}</td>
@@ -204,51 +423,125 @@
           <td><span class="badge ${badgeClass}">${status}</span></td>
           <td>
             <button class="btn btn-success btn-sm btn-action"
-              onclick="updateStatus('${id}', 'ดำเนินการเรียบร้อย')">✓</button>
+              onclick="requireAuth(() => updateStatus('${id}','ดำเนินการเรียบร้อย'))">✓</button>
             <button class="btn btn-danger btn-sm btn-action"
-              onclick="updateStatus('${id}', 'ยกเลิก')">✗</button>
+              onclick="requireAuth(() => updateStatus('${id}','ยกเลิก'))">✗</button>
           </td>
-        </tr>
-      `;
-      tbody.innerHTML += tr;
+        </tr>`;
     });
   }
 
-  function updateStatus(id, status) {
-    if (confirm(`ต้องการ ${status} คำขอนี้ใช่หรือไม่?`)) {
-      google.script.run.withSuccessHandler(res => {
-        alert(res);
-        loadRequests();
-        loadCalendar();
-      }).updateStatus(id, status);
+  /* ---------- requireAuth (ปุ่ม action ต้อง login ก่อน) ---------- */
+  function requireAuth(fn) {
+    if (!isAuthenticated) {
+      document.getElementById('loginOverlay').style.display = 'flex';
+      return;
     }
+    fn();
   }
 
+  /* ---------- updateStatus ---------- */
+  function updateStatus(id, status) {
+    showConfirm(`ต้องการ "${status}" คำขอนี้ใช่หรือไม่?`, () => {
+      google.script.run
+        .withSuccessHandler(() => {
+          document.getElementById('newBadgeHeader').style.display = 'none';
+          loadRequests();
+          loadCalendar();
+        })
+        .updateStatus(id, status);
+    });
+  }
+
+  /* ---------- updateStats ---------- */
+  function updateStats(data) {
+    document.getElementById('statTotal').textContent   = data.length;
+    document.getElementById('statPending').textContent = data.filter(r => r[11] === 'รอดำเนินการ').length;
+    document.getElementById('statDone').textContent    = data.filter(r => r[11] === 'ดำเนินการเรียบร้อย').length;
+  }
+
+  /* ---------- Calendar ---------- */
+  let calendarInstance = null;
+
   function loadCalendar() {
-    google.script.run.withSuccessHandler(renderCalendar).getCalendarEvents();
+    google.script.run
+      .withSuccessHandler(renderCalendar)
+      .withFailureHandler(err => console.error('getCalendarEvents failed', err))
+      .getCalendarEvents();
   }
 
   function renderCalendar(events) {
     const calendarEl = document.getElementById('calendar');
-    calendarEl.innerHTML = '';
 
-    const calendar = new FullCalendar.Calendar(calendarEl, {
+    if (calendarInstance) {
+      calendarInstance.removeAllEvents();
+      calendarInstance.addEventSource(events);
+      return;
+    }
+
+    calendarEl.innerHTML = '';
+    calendarInstance = new FullCalendar.Calendar(calendarEl, {
       initialView: 'dayGridMonth',
       locale: 'th',
       headerToolbar: {
-        left: 'prev,next today',
+        left:   'prev,next today',
         center: 'title',
-        right: 'dayGridMonth,timeGridWeek,listWeek'
+        right:  'dayGridMonth,timeGridWeek,listWeek'
       },
       events: events,
       eventClick: function(info) {
-        const p = info.event.extendedProps;
-        alert(`รายละเอียด:\nรถ: ${info.event.title}\nผู้จอง: ${p.booker} (${p.department})\nคนขับ: ${p.driver}\nสถานะ: ${p.status}`);
+        const p   = info.event.extendedProps;
+        const fmt = dt => dt ? dt.toLocaleString('th-TH',{
+          year:'numeric', month:'short', day:'numeric',
+          hour:'2-digit', minute:'2-digit'}) : '';
+        showEventModal({
+          title:  info.event.title,
+          start:  fmt(info.event.start),
+          end:    fmt(info.event.end),
+          booker: p.booker,
+          dept:   p.department,
+          driver: p.driver,
+          status: p.status,
+          color:  info.event.backgroundColor || '#6c757d'
+        });
       }
     });
-
-    calendar.render();
+    calendarInstance.render();
   }
+
+
+  /* ---------- Confirm Modal ---------- */
+  let _confirmCallback = null;
+  function showConfirm(msg, cb) {
+    document.getElementById('confirmMsg').textContent = msg;
+    _confirmCallback = cb;
+    document.getElementById('confirmOverlay').style.display = 'flex';
+  }
+  function closeConfirm(yes) {
+    document.getElementById('confirmOverlay').style.display = 'none';
+    if (yes && _confirmCallback) _confirmCallback();
+    _confirmCallback = null;
+  }
+  /* ---------- Event Detail Modal ---------- */
+  function showEventModal(ev) {
+    document.getElementById('evTitle').textContent  = '🚗 ' + ev.title;
+    document.getElementById('evTime').textContent   = ev.start + (ev.end ? ' → ' + ev.end : '');
+    document.getElementById('evBooker').textContent = ev.booker || '-';
+    document.getElementById('evDept').textContent   = ev.dept   || '-';
+    document.getElementById('evDriver').textContent = ev.driver || '-';
+    const badge = document.getElementById('evStatus');
+    badge.textContent       = ev.status;
+    badge.className         = 'ev-badge';
+    badge.style.background  = ev.color;
+    document.getElementById('eventOverlay').style.display = 'flex';
+  }
+
+  function closeEventModal() {
+    document.getElementById('eventOverlay').style.display = 'none';
+  }
+
+  // ปิดด้วย Escape
+  document.addEventListener('keydown', e => { if(e.key==='Escape') closeEventModal(); });
 </script>
 
 </body>
